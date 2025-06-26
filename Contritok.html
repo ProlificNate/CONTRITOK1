@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContriTok - Cameroon Language Translator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg,#7486d6 0%, #8d95db 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .translator-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            max-width: 900px;
+            width: 100%;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .language-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .language-dropdown {
+            flex: 1;
+            position: relative;
+        }
+
+        .language-dropdown select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .language-dropdown select:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .swap-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swap-button:hover {
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .translation-area {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-section, .output-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .text-input, .text-output {
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .text-input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .text-output {
+            background: #f8f9fa;
+            border-color: #d0d0d0;
+            color: #555;
+            cursor: text;
+        }
+
+        .translate-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .translate-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .translate-button:active {
+            transform: translateY(0);
+        }
+
+        .clear-button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-button:hover {
+            background: #ff5252;
+            transform: translateY(-1px);
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #c62828;
+            display: none;
+        }
+
+        .success-message {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #2e7d32;
+            display: none;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .language-selector {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .translation-area {
+                flex-direction: column;
+            }
+            
+            .translator-container {
+                padding: 20px;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ContriTok</h1>
+        <p>Cameroon Multilingual Translator</p>
+    </div>
+
+    <div class="translator-container">
+        <div class="language-selector">
+            <div class="language-dropdown">
+                <select id="fromLanguage">
+                    <option value="English">English</option>
+                    <option value="French">French</option>
+                    <option value="Bamileke">Bamileke (Medumba)</option>
+                    <option value="Douala">Douala</option>
+                    <option value="Lamnso">Lamnso</option>
+                </select>
+            </div>
+            
+            <button class="swap-button" id="swapLanguages" title="Swap Languages">
+                ⇄
+            </button>
+            
+            <div class="language-dropdown">
+                <select id="toLanguage">
+                    <option value="English">English</option>
+                    <option value="French" selected>French</option>
+                    <option value="Bamileke">Bamileke (Medumba)</option>
+                    <option value="Douala">Douala</option>
+                    <option value="Lamnso">Lamnso</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="translation-area">
+            <div class="input-section">
+                <div class="section-title">Enter Text</div>
+                <textarea id="inputText" class="text-input" placeholder="Type your text here..."></textarea>
+            </div>
+            
+            <div class="output-section">
+                <div class="section-title">Translation</div>
+                <textarea id="outputText" class="text-output" placeholder="Translation will appear here..." readonly></textarea>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 10px;">
+            <button class="translate-button" id="translateButton">Translate</button>
+            <button class="clear-button" id="clearButton">Clear</button>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+    </div>
+
+    <div class="footer">
+        <p>Supporting English, French, Bamileke (Medumba), Douala, and Lamnso languages</p>
+        <p>Built for Cameroon's linguistic diversity 🇨🇲</p>
+    </div>
+
+    <script>
+        // Translation data from the provided file
+        const translationData = [
+            {
+                "English": "I wake up early every day.",
+                "French": "Je me lève tôt tous les jours.",
+                "Bamileke": "Mí nkóŋŋɛ́ bwááŋŋɛ́ ndaŋ á nsi.",
+                "Douala": "Na mabolè matumba misanga.",
+                "Lamnso": "Myii tav loh yuv kishíy ki dzem"
+            },
+            {
+                "English": "What time do you eat breakfast?",
+                "French": "À quelle heure prends-tu le petit-déjeuner ?",
+                "Bamileke": "Kà wúsɨ́ lwèn lyɛ́?",
+                "Douala": "Súníngá wa mańɔ́ wɛlɛ?",
+                "Lamnso": "á yii yikiir kijavndzé a dzé ģhan ká?"
+            },
+            {
+                "English": "We work in the farm.",
+                "French": "Nous travaillons au champ.",
+                "Bamileke": "Bè nmbyà à nyoŋ.",
+                "Douala": "Di mada ná mbuńa ndé mba.",
+                "Lamnso": "Vér lìm î súm"
+            },
+            {
+                "English": "She cooks delicious food.",
+                "French": "Elle cuisine de la nourriture délicieuse.",
+                "Bamileke": "Ŋwàn ndzɛ́ŋŋɛ́ bwòŋ bwa ndzɛŋ.",
+                "Douala": "A bólí maboń madiɓa.",
+                "Lamnso": "Wú naá viyikír vé júng ví"
+            },
+            {
+                "English": "He goes to the market.",
+                "French": "Il va au marché.",
+                "Bamileke": "Ŋwàŋ nzɛ́ŋ à maŋké.",
+                "Douala": "A ma la na mundi.",
+                "Lamnso": " Wú dú wái."
+            },
+            {
+                "English": "I sweep the house.",
+                "French": "Je balaie la maison.",
+                "Bamileke": "Mí nswéŋŋɛ́ nda.",
+                "Douala": "Na maténda ndabo.",
+                "Lamnso": "Myi yér láv."
+            },
+            {
+                "English": "We fetch water from the stream.",
+                "French": "Nous puisons de l'eau à la rivière.",
+                "Bamileke": "Bè nzà à mɔ́ŋɔ́ mmbì.",
+                "Douala": "Di mayoka mándiba ná mudibɛ́.",
+                "Lamnso": "Vér tú mindrév fô ndrév."
+            },
+            {
+                "English": "They are planting corn today.",
+                "French": "Ils plantent du maïs aujourd'hui.",
+                "Bamileke": "Bè ngyámŋŋɛ́ mbùŋ á nsi.",
+                "Douala": "Ba mayɔlɔ kɔn ndé bɛlɛ.",
+                "Lamnso": " á wái ngwáng lán."
+            },
+            {
+                "English": "My grandmother tells stories.",
+                "French": "Ma grand-mère raconte des histoires.",
+                "Bamileke": "Mma mɨ ndzɛ́ŋŋɛ́ ndááŋŋɛ́.",
+                "Douala": "Nyango amɔń munańaka.",
+                "Lamnso": "yaà wôm yii fér mî titíy."
+            },
+            {
+                "English": "We gather around the fire in the evening.",
+                "French": "Nous nous réunissons autour du feu le soir.",
+                "Bamileke": "Bè nsɛ̀ŋŋɛ́ à ndòŋ à mfòŋ.",
+                "Douala": "Di makombana ni wanda misango.",
+                "Lamnso": "Vêr yii kaári ghà kîy í nkùr"
+            },
+            {
+                "English": "What are you doing now?",
+                "French": "Que fais-tu maintenant ?",
+                "Bamileke": "Kà wù mbyà?",
+                "Douala": "Njé wa manyi?",
+                "Lamnso": "á yii adze ká lén?"
+            },
+            {
+                "English": "I am going to sleep.",
+                "French": "Je vais dormir.",
+                "Bamileke": "Mí ngyam mfwìŋŋɛ́.",
+                "Douala": "Na ma la ná bɔ́lɔ",
+                "Lamnso": "msî du bùúni."
+            },
+            {
+                "English": "She is washing clothes.",
+                "French": "Elle lave les vêtements.",
+                "Bamileke": "Ŋwàn nwɛ́ŋŋɛ́ mfɔ́ŋ.",
+                "Douala": "A masɛ́lɛ́ ngɔ́bɔ́",
+                "Lamnso": "Wú sú ndzéy"
+            },
+            {
+                "English": "He eats yam and plantain.",
+                "French": "Il mange de l'igname et du plantain.",
+                "Bamileke": "Ŋwàŋ nlyɛ́ nkàŋ ndaŋŋɛ́.",
+                "Douala": "A mańɔ́ makɔlɔ na makoŋgɛlɛ.",
+                "Lamnso": "Wú yí kikú wúna kingóm ki."
+            },
+            {
+                "English": "We rest after work.",
+                "French": "Nous nous reposons après le travail.",
+                "Bamileke": "Bè nkɔ́ɔ́ŋŋɛ́ mbùŋ à mbòŋ.",
+                "Douala": "Di mabolè joma na mbuńa.",
+                "Lamnso": "Vér lím lím á miimí"
+            },
+            {
+                "English": "They sing church songs.",
+                "French": "Ils chantent des chants d'église.",
+                "Bamileke": "Bè nkwàŋŋɛ́ ndzɛ́ŋ à ŋwɔŋ.",
+                "Douala": "Ba mayɛná minjambí mi Njambe.",
+                "Lamnso": "á wúní yov lúng sé ngai Nyuy."
+            },
+            {
+                "English": "The children are playing.",
+                "French": "Les enfants jouent.",
+                "Bamileke": "Bana nnɛ́ŋŋɛ́.",
+                "Douala": "Bana ba matáma.",
+                "Lamnso": "Wáni sèéri."
+            },
+            {
+                "English": "I visit my family often.",
+                "French": "Je rends souvent visite à ma famille.",
+                "Bamileke": "Mí nkóŋŋɛ́ nfúwɨ mɨ ndaŋ.",
+                "Douala": "Na mada ná mbia wam misusu.",
+                "Lamnso": "Myii ghán kfèé yém ghán sí nîn"
+            },
+            {
+                "English": "What do you cook for dinner?",
+                "French": "Que cuisines-tu pour le dîner ?",
+                "Bamileke": "Kà wù ndzɛ́ŋŋɛ́ bwòŋ à mfòŋ?",
+                "Douala": "Njé wa masɛ́lɛ́ wɛlɛ á bwáńá?",
+                "Lamnso": "á nàá ká nkúr?"
+            },
+            {
+                "English": "I am learning a new language.",
+                "French": "J'apprends une nouvelle langue.",
+                "Bamileke": "Mí nkyam ngyàmŋŋɛ́ ŋwàŋ ɔ́bɔ́.",
+                "Douala": "Na malangá maloba ma bepópo.",
+                "Lamnso": "Myèéy lám wó fìíy."
+            },
+            {
+                "English": "Where are you going?",
+                "French": "Où vas-tu ?",
+                "Bamileke": "Kà wù nzɛ́ŋ à kwɛ̀?",
+                "Douala": "Wéni wa ma la?",
+                "Lamnso": "á dúú a dzé fé?"
+            },
+            {
+                "English": "I am going to the city.",
+                "French": "Je vais en ville.",
+                "Bamileke": "Mí ngyam à mbùŋ.",
+                "Douala": "Na ma la ná bupépe.",
+                "Lamnso": "Mdú nkáláá."
+            },
+            {
+                "English": "How long does it take to get there?",
+                "French": "Combien de temps faut-il pour y arriver ?",
+                "Bamileke": "Nàŋŋɛ́ ngyam à mbùŋ?",
+                "Douala": "Njika póndá e mańola á kwá?",
+                "Lamnso": "Mó mí fó dzé lé?"
+            },
+            {
+                "English": "Is the road good?",
+                "French": "La route est-elle bonne ?",
+                "Bamileke": "Ndàá nzà?",
+                "Douala": "Ndabé e bwâm?",
+                "Lamnso": "Dzèé dzé júng á?"
+            },
+            {
+                "English": "I want to visit my village.",
+                "French": "Je veux visiter mon village.",
+                "Bamileke": "Mí nkyam nkwɛŋŋɛ́ nda mɨ.",
+                "Douala": "Na mańola ná mbuńa wam.",
+                "Lamnso": "Mtá ghán nté yém."
+            },
+            {
+                "English": "When will you return?",
+                "French": "Quand reviendras-tu ?",
+                "Bamileke": "Kà wù nwɔ̀ŋŋɛ́ à wúsɨ́?",
+                "Douala": "Súníngá wa mańanga?",
+                "Lamnso": "á kfén bám ghán ká?"
+            },
+            {
+                "English": "Can you show me the way?",
+                "French": "Peux-tu me montrer le chemin ?",
+                "Bamileke": "Wù kwɛŋŋɛ́ mí ndàá?",
+                "Douala": "Wa bola mba njika ndolo?",
+                "Lamnso": "á dzé á din mó dzèé â?"
+            },
+            {
+                "English": "I came by bike.",
+                "French": "Je suis venu à vélo.",
+                "Bamileke": "Mí nkɔ́ɔ́ŋŋɛ́ à mfàŋkè.",
+                "Douala": "Na nalombá ná nloɓo.",
+                "Lamnso": "Mki wiíy shí ntúmtúm."
+            },
+            {
+                "English": "We will travel tomorrow.",
+                "French": "Nous voyagerons demain.",
+                "Bamileke": "Bè ngyam à ngyaŋ á bwááŋŋɛ́.",
+                "Douala": "Di mala ná bwáɲá.",
+                "Lamnso": "Vér lo dú ghán kibvéshí."
+            },
+            {
+                "English": "Is it far from here?",
+                "French": "Est-ce loin d'ici ?",
+                "Bamileke": "Nàŋŋɛ́ ndaŋ?",
+                "Douala": "E mba mbia na wɛlɛ?",
+                "Lamnso": "ki dár fó fén á?"
+            },
+            {
+                "English": "I need a place to stay.",
+                "French": "J'ai besoin d'un endroit où rester.",
+                "Bamileke": "Mí nkyam nda á kɔ́ɔ́ŋŋɛ́.",
+                "Douala": "Na mańola ndabo yadi á jom.",
+                "Lamnso": "Mtá kírê ké á shíy fó."
+            },
+            {
+                "English": "How much is the transport fare?",
+                "French": "Combien coûte le transport ?",
+                "Bamileke": "Nàŋŋɛ́ mbì à mbòŋ?",
+                "Douala": "Njé e mańola na mbambamba?",
+                "Lamnso": "Mbám sé ghán sí dzé sisìín?"
+            },
+            {
+                "English": "Where is the nearest market?",
+                "French": "Où est le marché le plus proche ?",
+                "Bamileke": "Maŋké á njiŋŋɛ́ à kwɛ̀?",
+                "Douala": "Wéni mundi mu mbia?",
+                "Lamnso": "wái wó fó ghánghí dzé fèé?"
+            },
+            {
+                "English": "I want to buy some fruits.",
+                "French": "Je veux acheter des fruits.",
+                "Bamileke": "Mí nkyam njɛ́ŋŋɛ́ bwòŋ bwàáŋŋɛ́.",
+                "Douala": "Na mańola ná miombé mi bómbo.",
+                "Lamnso": "Mtá yún vipolí."
+            },
+            {
+                "English": "Let's go together.",
+                "French": "Allons-y ensemble.",
+                "Bamileke": "Bè nzɛ́ŋŋɛ́ nkàŋ.",
+                "Douala": "Nangó ná ndeńde.",
+                "Lamnso": "wosó waá dú kí ghú kímòón."
+            },
+            {
+                "English": "I am happy.",
+                "French": "Je suis content(e).",
+                "Bamileke": "Mí ngwɛŋŋɛ́.",
+                "Douala": "Na ngandíla.",
+                "Lamnso": "Wùní bóng mó."
+            },
+            {
+                "English": "She is sad.",
+                "French": "Elle est triste.",
+                "Bamileke": "Ŋwàn nkúkŋŋɛ́.",
+                "Douala": "A bwákísí.",
+                "Lamnso": "wúni biír wún."
+            },
+            {
+                "English": "He is angry.",
+                "French": "Il est en colère.",
+                "Bamileke": "Ŋwàŋ ndzàŋŋɛ́.",
+                "Douala": "A nɛm.",
+                "Lamnso": "Wú shùìy kìlóng."
+            },
+            {
+                "English": "We are tired.",
+                "French": "Nous sommes fatigués.",
+                "Bamileke": "Bè nkɔ́ɔ́ŋŋɛ́.",
+                "Douala": "Di mba mańoɓi.",
+                "Lamnso": "vér dòŕní."
+            },
+            {
+                "English": "Are you afraid?",
+                "French": "As-tu peur ?",
+                "Bamileke": "Wù ngwɛŋŋɛ́ ndìŋŋɛ́?",
+                "Douala": "Wa mańola nuńgwa?",
+                "Lamnso": "á fánì á?"
+            },
+            {
+                "English": "I am surprised.",
+                "French": "Je suis surpris(e).",
+                "Bamileke": "Mí ngwɛŋŋɛ́.",
+                "Douala": "Na ngandíla.",
+                "Lamnso": "Mkèr kì shùúm ghún."
+            },
+            {
+                "English": "They are excited.",
+                "French": "Ils sont excités.",
+                "Bamileke": "Bè ngwɛŋŋɛ́ ndzɛ́ŋ.",
+                "Douala": "Ba ngandíla.",
+                "Lamnso": "á wúní shérí."
+            },
+            {
+                "English": "I feel good.",
+                "French": "Je me sens bien.",
+                "Bamileke": "Mí ngwɛŋŋɛ́ ndzɛŋ.",
+                "Douala": "Na ngandíla bwâm.",
+                "Lamnso": "Mkó kijúng."
+            },
+            {
+                "English": "Don't worry.",
+                "French": "Ne t'inquiète pas.",
+                "Bamileke": "Mbáá mbɔŋŋɛ́ ndìŋŋɛ́.",
+                "Douala": "Si mańola nuńgwa.",
+                "Lamnso": "lá yó á chí."
+            },
+            {
+                "English": "I love my family.",
+                "French": "J'aime ma famille.",
+                "Bamileke": "Mí nkɔ́ŋŋɛ́ nfúwɨ mɨ.",
+                "Douala": "Na ngandíla mbia wam.",
+                "Lamnso": "Mkóng kfé yém."
+            }
+        ];
+
+        // DOM elements
+        const fromLanguageSelect = document.getElementById('fromLanguage');
+        const toLanguageSelect = document.getElementById('toLanguage');
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const translateButton = document.getElementById('translateButton');
+        const clearButton = document.getElementById('clearButton');
+        const swapButton = document.getElementById('swapLanguages');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        // Event listeners
+        translateButton.addEventListener('click', translateText);
+        clearButton.addEventListener('click', clearText);
+        swapButton.addEventListener('click', swapLanguages);
+        inputText.addEventListener('input', clearMessages);
+
+        function translateText() {
+            const fromLang = fromLanguageSelect.value;
+            const toLang = toLanguageSelect.value;
+            const text = inputText.value.trim();
+
+            clearMessages();
+
+            if (!text) {
+                showError('Please enter some text to translate.');
+                return;
+            }
+
+            if (fromLang === toLang) {
+                showError('Please select different source and target languages.');
+                return;
+            }
+
+            // Add pulse animation to translate button
+            translateButton.classList.add('pulse');
+            translateButton.textContent = 'Translating...';
+
+            // Simulate processing time
+            setTimeout(() => {
+                const translation = findTranslation(text, fromLang, toLang);
+                
+                if (translation) {
+                    outputText.value = translation;
+                    showSuccess('Translation completed successfully!');
+                } else {
+                    showError('Translation not found. This translator works with pre-defined phrases.');
+                }
+
+                translateButton.classList.remove('pulse');
+                translateButton.textContent = 'Translate';
+            }, 800);
+        }
+
+        function findTranslation(inputText, fromLang, toLang) {
+            // Normalize input text for better matching
+            const normalizedInput = inputText.toLowerCase().trim();
+            
+            // First, try exact match
+            for (let entry of translationData) {
+                const sourceText = entry[fromLang];
+                if (sourceText && sourceText.toLowerCase().trim() === normalizedInput) {
+                    return entry[toLang] || 'Translation not available';
+                }
+            }
+
+            // If no exact match, try partial match
+            for (let entry of translationData) {
+                const sourceText = entry[fromLang];
+                if (sourceText && sourceText.toLowerCase().includes(normalizedInput)) {
+                    return entry[toLang] || 'Translation not available';
+                }
+            }
+
+            // If still no match, try reverse partial match
+            for (let entry of translationData) {
+                const sourceText = entry[fromLang];
+                if (sourceText && normalizedInput.includes(sourceText.toLowerCase())) {
+                    return entry[toLang] || 'Translation not available';
+                }
+            }
+
+            return null;
+        }
+
+        function clearText() {
+            inputText.value = '';
+            outputText.value = '';
+            clearMessages();
+            inputText.focus();
+        }
+
+        function swapLanguages() {
+            const fromValue = fromLanguageSelect.value;
+            const toValue = toLanguageSelect.value;
+            
+            fromLanguageSelect.value = toValue;
+            toLanguageSelect.value = fromValue;
+            
+            // Also swap the text if there's content
+            if (inputText.value && outputText.value) {
+                const tempText = inputText.value;
+                inputText.value = outputText.value;
+                outputText.value = tempText;
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function clearMessages() {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+
+        // Auto-resize textarea
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        inputText.addEventListener('input', function() {
+            autoResize(this);
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter to translate
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                translateText();
+            }
+            
+            // Ctrl/Cmd + K to clear
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                clearText();
+            }
+            
+            // Ctrl/Cmd + Shift + S to swap languages
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
+                e.preventDefault();
+                swapLanguages();
+            }
+        });
+
+        // Sample phrases functionality
+        function loadSamplePhrase() {
+            const randomIndex = Math.floor(Math.random() * translationData.length);
+            const randomEntry = translationData[randomIndex];
+            const fromLang = fromLanguageSelect.value;
+            
+            if (randomEntry[fromLang]) {
+                inputText.value = randomEntry[fromLang];
+                autoResize(inputText);
+                clearMessages();
+            }
+        }
+
+        // Add sample phrase button
+        const sampleButton = document.createElement('button');
+        sampleButton.textContent = 'Load Sample';
+        sampleButton.className = 'clear-button';
+        sampleButton.style.background = '#4caf50';
+        sampleButton.style.marginLeft = '5px';
+        sampleButton.addEventListener('click', loadSamplePhrase);
+        
+        // Insert sample button after clear button
+        clearButton.parentNode.insertBefore(sampleButton, clearButton.nextSibling);
+
+        // Focus on input field when page loads
+        window.addEventListener('load', function() {
+            inputText.focus();
+        });
+
+        // Add copy functionality
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                showSuccess('Text copied to clipboard!');
+            }).catch(function() {
+                showError('Failed to copy text to clipboard.');
+            });
+        }
+
+        // Add copy button to output area
+        const copyButton = document.createElement('button');
+        copyButton.innerHTML = '📋';
+        copyButton.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        `;
+        copyButton.title = 'Copy translation';
+        copyButton.addEventListener('click', function() {
+            if (outputText.value) {
+                copyToClipboard(outputText.value);
+            }
+        });
+
+        // Make output section relative and add copy button
+        const outputSection = document.querySelector('.output-section');
+        outputSection.style.position = 'relative';
+        outputSection.appendChild(copyButton);
+
+        // Show copy button only when there's text to copy
+        outputText.addEventListener('input', function() {
+            copyButton.style.display = this.value ? 'block' : 'none';
+        });
+        copyButton.style.display = 'none';
+    </script>
+</body>
+</html>
